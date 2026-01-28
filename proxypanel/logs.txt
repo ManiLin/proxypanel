@@ -1,0 +1,1390 @@
+warning: unused import: `crate::agent`
+ --> src/app.rs:7:5
+  |
+7 | use crate::agent;
+  |     ^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `copy_bidirectional`
+  --> src/app.rs:26:10
+   |
+26 |     io::{copy_bidirectional, AsyncReadExt, AsyncWriteExt},
+   |          ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `anyhow`
+ --> src/agent/agent_client.rs:1:14
+  |
+1 | use anyhow::{anyhow, Result};
+  |              ^^^^^^
+
+warning: unused imports: `HashSet` and `VecDeque`
+ --> src/agent/agent_proxy.rs:3:33
+  |
+3 | use std::collections::{HashMap, HashSet, VecDeque};
+  |                                 ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `std::net::SocketAddr`
+ --> src/agent/agent_proxy.rs:4:5
+  |
+4 | use std::net::SocketAddr;
+  |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `tokio_util::sync::CancellationToken`
+  --> src/agent/agent_proxy.rs:11:5
+   |
+11 | use tokio_util::sync::CancellationToken;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `warn`
+  --> src/agent/agent_proxy.rs:12:28
+   |
+12 | use tracing::{info, error, warn};
+   |                            ^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src/agent/agent_service.rs:3:21
+  |
+3 | use tracing::{info, error, warn};
+  |                     ^^^^^  ^^^^
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1113:17
+     |
+1113 |     if let Some(mut agent) = guard.agents.get_mut(&agent_id) {
+     |                 ----^^^^^
+     |                 |
+     |                 help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1440:5
+     |
+1440 |     mut inbound: TcpStream,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1455:9
+     |
+1455 |     let mut outbound = match TcpStream::connect(target_addr.as_str()).await {
+     |         ----^^^^^^^^
+     |         |
+     |         help: remove this `mut`
+
+error[E0596]: cannot borrow `*self` as mutable, as it is behind a `&` reference
+  --> src/agent/agent_client.rs:85:37
+   |
+85 |                     if let Err(e) = self.reconnect().await {
+   |                                     ^^^^ cannot borrow as mutable
+
+error[E0521]: borrowed data escapes outside of method
+  --> src/agent/agent_client.rs:72:9
+   |
+68 |       pub async fn start_heartbeat_loop(&self) {
+   |                                         -----
+   |                                         |
+   |                                         `self` is a reference that is only valid in the method body
+   |                                         let's call the lifetime of this reference `'1`
+...
+72 | /         tokio::spawn(async move {
+73 | |             let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(30));
+74 | |             
+75 | |             loop {
+...  |
+91 | |         });
+   | |          ^
+   | |          |
+   | |__________`self` escapes the method body here
+   |            argument requires that `'1` must outlive `'static`
+
+warning: variable does not need to be mutable
+  --> src/agent/agent_proxy.rs:91:9
+   |
+91 |         mut inbound: TcpStream,
+   |         ----^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/agent/agent_proxy.rs:97:13
+   |
+97 |         let mut outbound = TcpStream::connect(&target_addr).await
+   |             ----^^^^^^^^
+   |             |
+   |             help: remove this `mut`
+
+error[E0521]: borrowed data escapes outside of method
+   --> src/agent/agent_proxy.rs:236:25
+    |
+213 |       pub async fn start_listener(&self, rule: ProxyRule) -> Result<JoinHandle<()>> {
+    |                                   -----
+    |                                   |
+    |                                   `self` is a reference that is only valid in the method body
+    |                                   let's call the lifetime of this reference `'1`
+...
+236 | /                         tokio::spawn(async move {
+237 | |                             if let Err(e) = proxy_clone.handle_connection(stream, rule_clone, conn_id).await {
+238 | |                                 error!("Connection handling failed: {}", e);
+239 | |                             }
+240 | |                         });
+    | |                          ^
+    | |                          |
+    | |__________________________`self` escapes the method body here
+    |                            argument requires that `'1` must outlive `'static`
+
+error[E0592]: duplicate definitions with name `start_heartbeat_loop`
+  --> src/agent/agent_client.rs:68:5
+   |
+40 |     pub async fn start_heartbeat_loop(&self) {
+   |     ---------------------------------------- other definition for `start_heartbeat_loop`
+...
+68 |     pub async fn start_heartbeat_loop(&self) {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ duplicate definitions for `start_heartbeat_loop`
+
+warning: unused variable: `agent`
+    --> src/app.rs:1063:17
+     |
+1063 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `agent`
+    --> src/app.rs:1080:17
+     |
+1080 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+
+warning: unused variable: `agent`
+    --> src/app.rs:1097:17
+     |
+1097 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+
+warning: unused variable: `addr`
+   --> src/agent/agent_proxy.rs:225:33
+    |
+225 |                     Ok((stream, addr)) => {
+    |                                 ^^^^ help: if this is intentional, prefix it with an underscore: `_addr`
+
+Some errors have detailed explanations: E0521, E0592, E0596.
+For more information about an error, try `rustc --explain E0521`.
+warning: `proxy_panel` (bin "proxy_panel") generated 17 warnings
+error: could not compile `proxy_panel` (bin "proxy_panel") due to 4 previous errors; 17 warnings emitted
+[ERROR] ✗ Linux build failed
+   Compiling proxy_panel v0.1.0 (/opt/proxypanel)
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:10:5
+   |
+10 | use proxy_panel::agent_types::*;
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:11:5
+   |
+11 | use proxy_panel::agent::agent_client::AgentClient;
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:12:5
+   |
+12 | use proxy_panel::agent::agent_proxy::{AgentProxy, AgentProxyConfig};
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved imports `proxy_panel::agent::agent_client::AgentClient`, `proxy_panel::agent::agent_proxy::AgentProxy`, `proxy_panel::agent::agent_proxy::AgentProxyConfig`
+  --> src/agent_main.rs:11:5
+   |
+11 | use proxy_panel::agent::agent_client::AgentClient;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 | use proxy_panel::agent::agent_proxy::{AgentProxy, AgentProxyConfig};
+   |                                       ^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:184:13
+    |
+184 |             proxy_panel::agent::agent_service::install_systemd_service(service_name, &config)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:189:13
+    |
+189 |             proxy_panel::agent::agent_service::uninstall_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:194:13
+    |
+194 |             proxy_panel::agent::agent_service::start_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:199:13
+    |
+199 |             proxy_panel::agent::agent_service::stop_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:204:13
+    |
+204 |             proxy_panel::agent::agent_service::status_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0412]: cannot find type `AgentConfig` in this scope
+  --> src/agent_main.rs:65:24
+   |
+65 |     pub fn new(config: AgentConfig) -> Self {
+   |                        ^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `AgentConfig` in this scope
+   --> src/agent_main.rs:154:18
+    |
+154 |     let config = AgentConfig {
+    |                  ^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `AgentConfig` in this scope
+   --> src/agent_main.rs:212:22
+    |
+212 | fn run_agent(config: AgentConfig) -> Result<()> {
+    |                      ^^^^^^^^^^^ not found in this scope
+
+warning: unused import: `warn`
+ --> src/agent_main.rs:6:28
+  |
+6 | use tracing::{info, error, warn};
+  |                            ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0282]: type annotations needed
+  --> src/agent_main.rs:81:17
+   |
+81 |             let mut client = self.client.write().await;
+   |                 ^^^^^^^^^^
+82 |             client.connect().await?;
+   |             ------ type must be known at this point
+   |
+help: consider giving `client` an explicit type
+   |
+81 |             let mut client: /* Type */ = self.client.write().await;
+   |                           ++++++++++++
+
+error[E0599]: no method named `command` found for struct `clap::Command` in the current scope
+   --> src/agent_main.rs:139:10
+    |
+ 96 |       let matches = Command::new("proxy-panel-agent")
+    |  ___________________-
+ 97 | |         .version("1.0")
+ 98 | |         .about("Proxy Panel Agent - distributed proxy management agent")
+ 99 | |         .arg(
+...   |
+139 | |         .command(AgentCommand::Run)
+    | |_________-^^^^^^^
+    |
+help: there is a method `subcommand` with a similar name
+    |
+139 |         .subcommand(AgentCommand::Run)
+    |          +++
+
+error[E0599]: no variant named `Service` found for enum `AgentCommand`
+   --> src/agent_main.rs:140:32
+    |
+ 15 | enum AgentCommand {
+    | ----------------- variant `Service` not found here
+...
+140 |         .command(AgentCommand::Service {
+    |                                ^^^^^^^ variant not found in `AgentCommand`
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:183:32
+    |
+183 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:188:32
+    |
+188 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:193:32
+    |
+193 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:198:32
+    |
+198 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:203:32
+    |
+203 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+Some errors have detailed explanations: E0282, E0412, E0422, E0432, E0433, E0599.
+For more information about an error, try `rustc --explain E0282`.
+warning: `proxy_panel` (bin "proxy_panel_agent") generated 1 warning
+error: could not compile `proxy_panel` (bin "proxy_panel_agent") due to 20 previous errors; 1 warning emitted
+[ERROR] ✗ Linux agent build failed
+[INFO] Building for Windows (x86_64-pc-windows-gnu)...
+   Compiling windows-link v0.2.1
+   Compiling cfg-if v1.0.4
+   Compiling smallvec v1.15.1
+   Compiling pin-project-lite v0.2.16
+   Compiling bytes v1.11.0
+   Compiling itoa v1.0.17
+   Compiling windows_x86_64_gnu v0.53.1
+   Compiling futures-core v0.3.31
+   Compiling windows-sys v0.61.2
+   Compiling parking_lot_core v0.9.12
+   Compiling zerofrom v0.1.6
+   Compiling stable_deref_trait v1.2.1
+   Compiling scopeguard v1.2.0
+   Compiling pin-utils v0.1.0
+   Compiling windows-targets v0.53.5
+   Compiling lock_api v0.4.14
+   Compiling yoke v0.8.1
+   Compiling once_cell v1.21.3
+   Compiling windows-sys v0.60.2
+   Compiling futures-task v0.3.31
+   Compiling zerovec v0.11.5
+   Compiling futures-util v0.3.31
+   Compiling serde_core v1.0.228
+   Compiling log v0.4.29
+   Compiling tower-service v0.3.3
+   Compiling parking_lot v0.12.5
+   Compiling tracing-core v0.1.36
+   Compiling tinystr v0.8.2
+   Compiling litemap v0.8.1
+   Compiling writeable v0.6.2
+   Compiling serde v1.0.228
+   Compiling httparse v1.10.1
+   Compiling tracing v0.1.44
+   Compiling icu_locale_core v2.1.1
+   Compiling ring v0.17.14
+   Compiling potential_utf v0.1.4
+   Compiling http v1.4.0
+   Compiling zerotrie v0.2.3
+   Compiling socket2 v0.6.1
+   Compiling percent-encoding v2.3.2
+   Compiling zeroize v1.8.2
+   Compiling windows_x86_64_gnu v0.52.6
+   Compiling try-lock v0.2.5
+   Compiling tower-layer v0.3.3
+   Compiling want v0.3.1
+   Compiling icu_normalizer_data v2.1.1
+   Compiling rustls-pki-types v1.13.3
+   Compiling http-body v1.0.1
+   Compiling icu_properties_data v2.1.2
+   Compiling icu_provider v2.1.1
+   Compiling icu_collections v2.1.1
+   Compiling futures-channel v0.3.31
+   Compiling mio v1.1.1
+   Compiling getrandom v0.2.17
+   Compiling untrusted v0.9.0
+   Compiling fnv v1.0.7
+   Compiling http v0.2.12
+   Compiling windows_x86_64_gnu v0.42.2
+   Compiling windows-targets v0.52.6
+   Compiling libc v0.2.180
+   Compiling icu_properties v2.1.2
+   Compiling icu_normalizer v2.1.1
+   Compiling form_urlencoded v1.2.2
+   Compiling atomic-waker v1.1.2
+   Compiling subtle v2.6.1
+   Compiling tokio v1.49.0
+   Compiling utf8parse v0.2.2
+   Compiling anstyle v1.0.13
+   Compiling once_cell_polyfill v1.70.2
+   Compiling zmij v1.0.14
+   Compiling anstyle-wincon v3.0.11
+   Compiling anstyle-parse v0.2.7
+   Compiling http-body v0.4.6
+   Compiling windows-sys v0.52.0
+   Compiling anstyle-query v1.1.5
+   Compiling sync_wrapper v1.0.2
+   Compiling idna_adapter v1.2.1
+   Compiling ryu v1.0.22
+   Compiling utf8_iter v1.0.4
+   Compiling regex-syntax v0.8.8
+   Compiling bitflags v2.10.0
+   Compiling base64 v0.22.1
+   Compiling colorchoice v1.0.4
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling memchr v2.7.6
+   Compiling ipnet v2.11.0
+   Compiling serde_json v1.0.149
+   Compiling anstream v0.6.21
+   Compiling serde_urlencoded v0.7.1
+   Compiling idna v1.1.0
+   Compiling socket2 v0.5.10
+   Compiling pin-project v1.1.10
+   Compiling axum-core v0.3.4
+   Compiling windows-targets v0.42.2
+   Compiling num-traits v0.2.19
+   Compiling regex-automata v0.4.13
+   Compiling webpki-roots v1.0.5
+   Compiling mime v0.3.17
+   Compiling iri-string v0.7.10
+   Compiling lazy_static v1.5.0
+   Compiling strsim v0.11.1
+   Compiling powerfmt v0.2.0
+   Compiling bitflags v1.3.2
+   Compiling httpdate v1.0.3
+   Compiling clap_lex v0.7.7
+   Compiling deranged v0.5.5
+   Compiling rustls v0.23.36
+   Compiling clap_builder v4.5.54
+   Compiling anyhow v1.0.100
+   Compiling sharded-slab v0.1.7
+   Compiling hyper v1.8.1
+   Compiling tower v0.5.3
+   Compiling rustls-webpki v0.103.8
+   Compiling hyper-util v0.1.19
+   Compiling tower-http v0.6.8
+   Compiling matchers v0.2.0
+   Compiling tower v0.4.13
+   Compiling hyper v0.14.32
+   Compiling axum v0.6.20
+   Compiling url v2.5.8
+   Compiling windows-sys v0.45.0
+   Compiling tokio-rustls v0.26.4
+   Compiling hyper-rustls v0.27.7
+   Compiling ipnetwork v0.20.0
+   Compiling nu-ansi-term v0.50.3
+   Compiling serde_path_to_error v0.1.20
+   Compiling http-body-util v0.1.3
+   Compiling tracing-log v0.2.0
+   Compiling thread_local v1.1.9
+   Compiling matchit v0.7.3
+   Compiling num-conv v0.1.0
+   Compiling futures-sink v0.3.31
+   Compiling time-core v0.1.7
+   Compiling http-range-header v0.3.1
+   Compiling sync_wrapper v0.1.2
+   Compiling widestring v1.2.1
+   Compiling time v0.3.45
+   Compiling tower-http v0.4.4
+   Compiling tokio-util v0.7.18
+   Compiling tracing-subscriber v0.3.22
+   Compiling windows-service v0.6.0
+   Compiling reqwest v0.12.28
+   Compiling maxminddb v0.24.0
+   Compiling chrono v0.4.43
+   Compiling clap v4.5.54
+   Compiling proxy_panel v0.1.0 (/opt/proxypanel)
+warning: unused import: `crate::agent`
+ --> src/app.rs:7:5
+  |
+7 | use crate::agent;
+  |     ^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `copy_bidirectional`
+  --> src/app.rs:26:10
+   |
+26 |     io::{copy_bidirectional, AsyncReadExt, AsyncWriteExt},
+   |          ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `anyhow`
+ --> src/agent/agent_client.rs:1:14
+  |
+1 | use anyhow::{anyhow, Result};
+  |              ^^^^^^
+
+warning: unused imports: `HashSet` and `VecDeque`
+ --> src/agent/agent_proxy.rs:3:33
+  |
+3 | use std::collections::{HashMap, HashSet, VecDeque};
+  |                                 ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `std::net::SocketAddr`
+ --> src/agent/agent_proxy.rs:4:5
+  |
+4 | use std::net::SocketAddr;
+  |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `tokio_util::sync::CancellationToken`
+  --> src/agent/agent_proxy.rs:11:5
+   |
+11 | use tokio_util::sync::CancellationToken;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `warn`
+  --> src/agent/agent_proxy.rs:12:28
+   |
+12 | use tracing::{info, error, warn};
+   |                            ^^^^
+
+warning: unused import: `anyhow`
+ --> src/agent/agent_service.rs:1:14
+  |
+1 | use anyhow::{anyhow, Result};
+  |              ^^^^^^
+
+warning: unused import: `std::process::Command`
+ --> src/agent/agent_service.rs:2:5
+  |
+2 | use std::process::Command;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src/agent/agent_service.rs:3:21
+  |
+3 | use tracing::{info, error, warn};
+  |                     ^^^^^  ^^^^
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1113:17
+     |
+1113 |     if let Some(mut agent) = guard.agents.get_mut(&agent_id) {
+     |                 ----^^^^^
+     |                 |
+     |                 help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1440:5
+     |
+1440 |     mut inbound: TcpStream,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1455:9
+     |
+1455 |     let mut outbound = match TcpStream::connect(target_addr.as_str()).await {
+     |         ----^^^^^^^^
+     |         |
+     |         help: remove this `mut`
+
+error[E0596]: cannot borrow `*self` as mutable, as it is behind a `&` reference
+  --> src/agent/agent_client.rs:85:37
+   |
+85 |                     if let Err(e) = self.reconnect().await {
+   |                                     ^^^^ cannot borrow as mutable
+
+error[E0521]: borrowed data escapes outside of method
+  --> src/agent/agent_client.rs:72:9
+   |
+68 |       pub async fn start_heartbeat_loop(&self) {
+   |                                         -----
+   |                                         |
+   |                                         `self` is a reference that is only valid in the method body
+   |                                         let's call the lifetime of this reference `'1`
+...
+72 | /         tokio::spawn(async move {
+73 | |             let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(30));
+74 | |             
+75 | |             loop {
+...  |
+91 | |         });
+   | |          ^
+   | |          |
+   | |__________`self` escapes the method body here
+   |            argument requires that `'1` must outlive `'static`
+
+warning: variable does not need to be mutable
+  --> src/agent/agent_proxy.rs:91:9
+   |
+91 |         mut inbound: TcpStream,
+   |         ----^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/agent/agent_proxy.rs:97:13
+   |
+97 |         let mut outbound = TcpStream::connect(&target_addr).await
+   |             ----^^^^^^^^
+   |             |
+   |             help: remove this `mut`
+
+error[E0521]: borrowed data escapes outside of method
+   --> src/agent/agent_proxy.rs:236:25
+    |
+213 |       pub async fn start_listener(&self, rule: ProxyRule) -> Result<JoinHandle<()>> {
+    |                                   -----
+    |                                   |
+    |                                   `self` is a reference that is only valid in the method body
+    |                                   let's call the lifetime of this reference `'1`
+...
+236 | /                         tokio::spawn(async move {
+237 | |                             if let Err(e) = proxy_clone.handle_connection(stream, rule_clone, conn_id).await {
+238 | |                                 error!("Connection handling failed: {}", e);
+239 | |                             }
+240 | |                         });
+    | |                          ^
+    | |                          |
+    | |__________________________`self` escapes the method body here
+    |                            argument requires that `'1` must outlive `'static`
+
+error[E0592]: duplicate definitions with name `start_heartbeat_loop`
+  --> src/agent/agent_client.rs:68:5
+   |
+40 |     pub async fn start_heartbeat_loop(&self) {
+   |     ---------------------------------------- other definition for `start_heartbeat_loop`
+...
+68 |     pub async fn start_heartbeat_loop(&self) {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ duplicate definitions for `start_heartbeat_loop`
+
+error[E0308]: mismatched types
+  --> src/agent/agent_service.rs:33:40
+   |
+33 |     service::run_service(service_name, config)?;
+   |     --------------------               ^^^^^^ expected `AppConfig`, found `AgentConfig`
+   |     |
+   |     arguments to this function are incorrect
+   |
+note: function defined here
+  --> src/service.rs:30:8
+   |
+30 | pub fn run_service(service_name: String, config: AppConfig) -> Result<()> {
+   |        ^^^^^^^^^^^                       -----------------
+
+warning: unused variable: `agent`
+    --> src/app.rs:1063:17
+     |
+1063 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `agent`
+    --> src/app.rs:1080:17
+     |
+1080 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+
+warning: unused variable: `agent`
+    --> src/app.rs:1097:17
+     |
+1097 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+
+warning: unused variable: `addr`
+   --> src/agent/agent_proxy.rs:225:33
+    |
+225 |                     Ok((stream, addr)) => {
+    |                                 ^^^^ help: if this is intentional, prefix it with an underscore: `_addr`
+
+error[E0382]: borrow of moved value: `service_name`
+   --> src/agent/agent_service.rs:18:58
+    |
+  8 | pub fn install_agent_service(service_name: String, config: &AgentConfig) -> Result<()> {
+    |                              ------------ move occurs because `service_name` has type `std::string::String`, which does not implement the `Copy` trait
+...
+ 17 |     service::install_service(service_name, &args, &config.data_dir)?;
+    |                              ------------ value moved here
+ 18 |     info!("Windows service '{}' installed successfully", service_name);
+    |                                                          ^^^^^^^^^^^^ value borrowed here after move
+    |
+note: consider changing this parameter type in function `install_service` to borrow instead if owning the value isn't necessary
+   --> src/service.rs:112:38
+    |
+112 | pub fn install_service(service_name: String, http_addr: &str, data_dir: &str) -> Result<()> {
+    |        ---------------               ^^^^^^ this parameter takes ownership of the value
+    |        |
+    |        in this function
+    = note: this error originates in the macro `$crate::__macro_support::format_args` which comes from the expansion of the macro `info` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider cloning the value if the performance cost is acceptable
+    |
+ 17 |     service::install_service(service_name.clone(), &args, &config.data_dir)?;
+    |                                          ++++++++
+
+warning: unused variable: `exe_path`
+  --> src/agent/agent_service.rs:11:9
+   |
+11 |     let exe_path = std::env::current_exe()?;
+   |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_exe_path`
+
+error[E0382]: borrow of moved value: `service_name`
+   --> src/agent/agent_service.rs:26:60
+    |
+ 23 | pub fn uninstall_agent_service(service_name: String) -> Result<()> {
+    |                                ------------ move occurs because `service_name` has type `std::string::String`, which does not implement the `Copy` trait
+ 24 |     use crate::service;
+ 25 |     service::uninstall_service(service_name)?;
+    |                                ------------ value moved here
+ 26 |     info!("Windows service '{}' uninstalled successfully", service_name);
+    |                                                            ^^^^^^^^^^^^ value borrowed here after move
+    |
+note: consider changing this parameter type in function `uninstall_service` to borrow instead if owning the value isn't necessary
+   --> src/service.rs:147:40
+    |
+147 | pub fn uninstall_service(service_name: String) -> Result<()> {
+    |        -----------------               ^^^^^^ this parameter takes ownership of the value
+    |        |
+    |        in this function
+    = note: this error originates in the macro `$crate::__macro_support::format_args` which comes from the expansion of the macro `info` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider cloning the value if the performance cost is acceptable
+    |
+ 25 |     service::uninstall_service(service_name.clone())?;
+    |                                            ++++++++
+
+Some errors have detailed explanations: E0308, E0382, E0521, E0592, E0596.
+For more information about an error, try `rustc --explain E0308`.
+warning: `proxy_panel` (bin "proxy_panel") generated 20 warnings
+error: could not compile `proxy_panel` (bin "proxy_panel") due to 7 previous errors; 20 warnings emitted
+[ERROR] ✗ Windows build failed
+   Compiling proxy_panel v0.1.0 (/opt/proxypanel)
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:10:5
+   |
+10 | use proxy_panel::agent_types::*;
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:11:5
+   |
+11 | use proxy_panel::agent::agent_client::AgentClient;
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:12:5
+   |
+12 | use proxy_panel::agent::agent_proxy::{AgentProxy, AgentProxyConfig};
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved imports `proxy_panel::agent::agent_client::AgentClient`, `proxy_panel::agent::agent_proxy::AgentProxy`, `proxy_panel::agent::agent_proxy::AgentProxyConfig`
+  --> src/agent_main.rs:11:5
+   |
+11 | use proxy_panel::agent::agent_client::AgentClient;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 | use proxy_panel::agent::agent_proxy::{AgentProxy, AgentProxyConfig};
+   |                                       ^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:169:13
+    |
+169 |             proxy_panel::agent::agent_service::run_agent_service(service_name, config)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:174:13
+    |
+174 |             proxy_panel::agent::agent_service::install_agent_service(service_name, &config)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:179:13
+    |
+179 |             proxy_panel::agent::agent_service::uninstall_agent_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0412]: cannot find type `AgentConfig` in this scope
+  --> src/agent_main.rs:65:24
+   |
+65 |     pub fn new(config: AgentConfig) -> Self {
+   |                        ^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `AgentConfig` in this scope
+   --> src/agent_main.rs:154:18
+    |
+154 |     let config = AgentConfig {
+    |                  ^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `AgentConfig` in this scope
+   --> src/agent_main.rs:212:22
+    |
+212 | fn run_agent(config: AgentConfig) -> Result<()> {
+    |                      ^^^^^^^^^^^ not found in this scope
+
+warning: unused import: `warn`
+ --> src/agent_main.rs:6:28
+  |
+6 | use tracing::{info, error, warn};
+  |                            ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0282]: type annotations needed
+  --> src/agent_main.rs:81:17
+   |
+81 |             let mut client = self.client.write().await;
+   |                 ^^^^^^^^^^
+82 |             client.connect().await?;
+   |             ------ type must be known at this point
+   |
+help: consider giving `client` an explicit type
+   |
+81 |             let mut client: /* Type */ = self.client.write().await;
+   |                           ++++++++++++
+
+error[E0599]: no method named `command` found for struct `clap::Command` in the current scope
+   --> src/agent_main.rs:139:10
+    |
+ 96 |       let matches = Command::new("proxy-panel-agent")
+    |  ___________________-
+ 97 | |         .version("1.0")
+ 98 | |         .about("Proxy Panel Agent - distributed proxy management agent")
+ 99 | |         .arg(
+...   |
+139 | |         .command(AgentCommand::Run)
+    | |_________-^^^^^^^
+    |
+help: there is a method `subcommand` with a similar name
+    |
+139 |         .subcommand(AgentCommand::Run)
+    |          +++
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:168:32
+    |
+168 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:173:32
+    |
+173 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:178:32
+    |
+178 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+Some errors have detailed explanations: E0282, E0412, E0422, E0432, E0433, E0599.
+For more information about an error, try `rustc --explain E0282`.
+warning: `proxy_panel` (bin "proxy_panel_agent") generated 1 warning
+error: could not compile `proxy_panel` (bin "proxy_panel_agent") due to 15 previous errors; 1 warning emitted
+[ERROR] ✗ Windows agent build failed
+[INFO] Building for current host...
+   Compiling cfg-if v1.0.4
+   Compiling bytes v1.11.0
+   Compiling smallvec v1.15.1
+   Compiling pin-project-lite v0.2.16
+   Compiling libc v0.2.180
+   Compiling itoa v1.0.17
+   Compiling futures-core v0.3.31
+   Compiling parking_lot_core v0.9.12
+   Compiling zerofrom v0.1.6
+   Compiling scopeguard v1.2.0
+   Compiling stable_deref_trait v1.2.1
+   Compiling lock_api v0.4.14
+   Compiling once_cell v1.21.3
+   Compiling pin-utils v0.1.0
+   Compiling yoke v0.8.1
+   Compiling futures-task v0.3.31
+   Compiling serde_core v1.0.228
+   Compiling log v0.4.29
+   Compiling tower-service v0.3.3
+   Compiling futures-util v0.3.31
+   Compiling tracing-core v0.1.36
+   Compiling zerovec v0.11.5
+   Compiling litemap v0.8.1
+   Compiling writeable v0.6.2
+   Compiling serde v1.0.228
+   Compiling httparse v1.10.1
+   Compiling ring v0.17.14
+   Compiling http v1.4.0
+   Compiling tracing v0.1.44
+   Compiling tinystr v0.8.2
+   Compiling icu_locale_core v2.1.1
+   Compiling potential_utf v0.1.4
+   Compiling errno v0.3.14
+   Compiling socket2 v0.6.1
+   Compiling signal-hook-registry v1.4.8
+   Compiling parking_lot v0.12.5
+   Compiling mio v1.1.1
+   Compiling tokio v1.49.0
+   Compiling zerotrie v0.2.3
+   Compiling tower-layer v0.3.3
+   Compiling try-lock v0.2.5
+   Compiling percent-encoding v2.3.2
+   Compiling zeroize v1.8.2
+   Compiling want v0.3.1
+   Compiling icu_provider v2.1.1
+   Compiling rustls-pki-types v1.13.3
+   Compiling icu_properties_data v2.1.2
+   Compiling icu_normalizer_data v2.1.1
+   Compiling http-body v1.0.1
+   Compiling icu_collections v2.1.1
+   Compiling getrandom v0.2.17
+   Compiling futures-channel v0.3.31
+   Compiling fnv v1.0.7
+   Compiling untrusted v0.9.0
+   Compiling http v0.2.12
+   Compiling icu_normalizer v2.1.1
+   Compiling form_urlencoded v1.2.2
+   Compiling subtle v2.6.1
+   Compiling icu_properties v2.1.2
+   Compiling atomic-waker v1.1.2
+   Compiling utf8parse v0.2.2
+   Compiling zmij v1.0.14
+   Compiling sync_wrapper v1.0.2
+   Compiling anstyle-parse v0.2.7
+   Compiling ryu v1.0.22
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle-query v1.1.5
+   Compiling base64 v0.22.1
+   Compiling bitflags v2.10.0
+   Compiling colorchoice v1.0.4
+   Compiling anstyle v1.0.13
+   Compiling utf8_iter v1.0.4
+   Compiling memchr v2.7.6
+   Compiling regex-syntax v0.8.8
+   Compiling http-body v0.4.6
+   Compiling ipnet v2.11.0
+   Compiling idna_adapter v1.2.1
+   Compiling idna v1.1.0
+   Compiling anstream v0.6.21
+   Compiling serde_json v1.0.149
+   Compiling serde_urlencoded v0.7.1
+   Compiling pin-project v1.1.10
+   Compiling regex-automata v0.4.13
+   Compiling axum-core v0.3.4
+   Compiling num-traits v0.2.19
+   Compiling webpki-roots v1.0.5
+   Compiling socket2 v0.5.10
+   Compiling powerfmt v0.2.0
+   Compiling lazy_static v1.5.0
+   Compiling clap_lex v0.7.7
+   Compiling mime v0.3.17
+   Compiling iri-string v0.7.10
+   Compiling strsim v0.11.1
+   Compiling httpdate v1.0.3
+   Compiling clap_builder v4.5.54
+   Compiling deranged v0.5.5
+   Compiling rustls v0.23.36
+   Compiling hyper v1.8.1
+   Compiling tower v0.5.3
+   Compiling rustls-webpki v0.103.8
+   Compiling hyper-util v0.1.19
+   Compiling tower-http v0.6.8
+   Compiling matchers v0.2.0
+   Compiling hyper v0.14.32
+   Compiling tower v0.4.13
+   Compiling anyhow v1.0.100
+   Compiling sharded-slab v0.1.7
+   Compiling axum v0.6.20
+   Compiling url v2.5.8
+   Compiling ipnetwork v0.20.0
+   Compiling serde_path_to_error v0.1.20
+   Compiling http-body-util v0.1.3
+   Compiling tracing-log v0.2.0
+   Compiling tokio-rustls v0.26.4
+   Compiling thread_local v1.1.9
+   Compiling hyper-rustls v0.27.7
+   Compiling bitflags v1.3.2
+   Compiling matchit v0.7.3
+   Compiling num-conv v0.1.0
+   Compiling time-core v0.1.7
+   Compiling http-range-header v0.3.1
+   Compiling iana-time-zone v0.1.64
+   Compiling futures-sink v0.3.31
+   Compiling nu-ansi-term v0.50.3
+   Compiling sync_wrapper v0.1.2
+   Compiling chrono v0.4.43
+   Compiling tracing-subscriber v0.3.22
+   Compiling tower-http v0.4.4
+   Compiling tokio-util v0.7.18
+   Compiling time v0.3.45
+   Compiling reqwest v0.12.28
+   Compiling maxminddb v0.24.0
+   Compiling clap v4.5.54
+   Compiling proxy_panel v0.1.0 (/opt/proxypanel)
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:10:5
+   |
+10 | use proxy_panel::agent_types::*;
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:11:5
+   |
+11 | use proxy_panel::agent::agent_client::AgentClient;
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+  --> src/agent_main.rs:12:5
+   |
+12 | use proxy_panel::agent::agent_proxy::{AgentProxy, AgentProxyConfig};
+   |     ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+   |
+   = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved imports `proxy_panel::agent::agent_client::AgentClient`, `proxy_panel::agent::agent_proxy::AgentProxy`, `proxy_panel::agent::agent_proxy::AgentProxyConfig`
+  --> src/agent_main.rs:11:5
+   |
+11 | use proxy_panel::agent::agent_client::AgentClient;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 | use proxy_panel::agent::agent_proxy::{AgentProxy, AgentProxyConfig};
+   |                                       ^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:184:13
+    |
+184 |             proxy_panel::agent::agent_service::install_systemd_service(service_name, &config)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:189:13
+    |
+189 |             proxy_panel::agent::agent_service::uninstall_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:194:13
+    |
+194 |             proxy_panel::agent::agent_service::start_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:199:13
+    |
+199 |             proxy_panel::agent::agent_service::stop_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `proxy_panel`
+   --> src/agent_main.rs:204:13
+    |
+204 |             proxy_panel::agent::agent_service::status_systemd_service(service_name)
+    |             ^^^^^^^^^^^ use of unresolved module or unlinked crate `proxy_panel`
+    |
+    = help: if you wanted to use a crate named `proxy_panel`, use `cargo add proxy_panel` to add it to your `Cargo.toml`
+
+error[E0412]: cannot find type `AgentConfig` in this scope
+  --> src/agent_main.rs:65:24
+   |
+65 |     pub fn new(config: AgentConfig) -> Self {
+   |                        ^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `AgentConfig` in this scope
+   --> src/agent_main.rs:154:18
+    |
+154 |     let config = AgentConfig {
+    |                  ^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `AgentConfig` in this scope
+   --> src/agent_main.rs:212:22
+    |
+212 | fn run_agent(config: AgentConfig) -> Result<()> {
+    |                      ^^^^^^^^^^^ not found in this scope
+
+warning: unused import: `warn`
+ --> src/agent_main.rs:6:28
+  |
+6 | use tracing::{info, error, warn};
+  |                            ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0282]: type annotations needed
+  --> src/agent_main.rs:81:17
+   |
+81 |             let mut client = self.client.write().await;
+   |                 ^^^^^^^^^^
+82 |             client.connect().await?;
+   |             ------ type must be known at this point
+   |
+help: consider giving `client` an explicit type
+   |
+81 |             let mut client: /* Type */ = self.client.write().await;
+   |                           ++++++++++++
+
+warning: unused import: `crate::agent`
+ --> src/app.rs:7:5
+  |
+7 | use crate::agent;
+  |     ^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `copy_bidirectional`
+  --> src/app.rs:26:10
+   |
+26 |     io::{copy_bidirectional, AsyncReadExt, AsyncWriteExt},
+   |          ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `anyhow`
+ --> src/agent/agent_client.rs:1:14
+  |
+1 | use anyhow::{anyhow, Result};
+  |              ^^^^^^
+
+warning: unused imports: `HashSet` and `VecDeque`
+ --> src/agent/agent_proxy.rs:3:33
+  |
+3 | use std::collections::{HashMap, HashSet, VecDeque};
+  |                                 ^^^^^^^  ^^^^^^^^
+
+warning: unused import: `std::net::SocketAddr`
+ --> src/agent/agent_proxy.rs:4:5
+  |
+4 | use std::net::SocketAddr;
+  |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `tokio_util::sync::CancellationToken`
+  --> src/agent/agent_proxy.rs:11:5
+   |
+11 | use tokio_util::sync::CancellationToken;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `warn`
+  --> src/agent/agent_proxy.rs:12:28
+   |
+12 | use tracing::{info, error, warn};
+   |                            ^^^^
+
+warning: unused imports: `error` and `warn`
+ --> src/agent/agent_service.rs:3:21
+  |
+3 | use tracing::{info, error, warn};
+  |                     ^^^^^  ^^^^
+
+error[E0599]: no method named `command` found for struct `clap::Command` in the current scope
+   --> src/agent_main.rs:139:10
+    |
+ 96 |       let matches = Command::new("proxy-panel-agent")
+    |  ___________________-
+ 97 | |         .version("1.0")
+ 98 | |         .about("Proxy Panel Agent - distributed proxy management agent")
+ 99 | |         .arg(
+...   |
+139 | |         .command(AgentCommand::Run)
+    | |_________-^^^^^^^
+    |
+help: there is a method `subcommand` with a similar name
+    |
+139 |         .subcommand(AgentCommand::Run)
+    |          +++
+
+error[E0599]: no variant named `Service` found for enum `AgentCommand`
+   --> src/agent_main.rs:140:32
+    |
+ 15 | enum AgentCommand {
+    | ----------------- variant `Service` not found here
+...
+140 |         .command(AgentCommand::Service {
+    |                                ^^^^^^^ variant not found in `AgentCommand`
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:183:32
+    |
+183 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:188:32
+    |
+188 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:193:32
+    |
+193 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:198:32
+    |
+198 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+error[E0282]: type annotations needed
+   --> src/agent_main.rs:203:32
+    |
+203 |             let service_name = sub_matches.get_one::<String>("service_name").unwrap().clone();
+    |                                ^^^^^^^^^^^ cannot infer type
+
+Some errors have detailed explanations: E0282, E0412, E0422, E0432, E0433, E0599.
+For more information about an error, try `rustc --explain E0282`.
+warning: `proxy_panel` (bin "proxy_panel_agent") generated 1 warning
+error: could not compile `proxy_panel` (bin "proxy_panel_agent") due to 20 previous errors; 1 warning emitted
+warning: build failed, waiting for other jobs to finish...
+warning: variable does not need to be mutable
+    --> src/app.rs:1113:17
+     |
+1113 |     if let Some(mut agent) = guard.agents.get_mut(&agent_id) {
+     |                 ----^^^^^
+     |                 |
+     |                 help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1440:5
+     |
+1440 |     mut inbound: TcpStream,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/app.rs:1455:9
+     |
+1455 |     let mut outbound = match TcpStream::connect(target_addr.as_str()).await {
+     |         ----^^^^^^^^
+     |         |
+     |         help: remove this `mut`
+
+error[E0596]: cannot borrow `*self` as mutable, as it is behind a `&` reference
+  --> src/agent/agent_client.rs:85:37
+   |
+85 |                     if let Err(e) = self.reconnect().await {
+   |                                     ^^^^ cannot borrow as mutable
+
+error[E0521]: borrowed data escapes outside of method
+  --> src/agent/agent_client.rs:72:9
+   |
+68 |       pub async fn start_heartbeat_loop(&self) {
+   |                                         -----
+   |                                         |
+   |                                         `self` is a reference that is only valid in the method body
+   |                                         let's call the lifetime of this reference `'1`
+...
+72 | /         tokio::spawn(async move {
+73 | |             let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(30));
+74 | |             
+75 | |             loop {
+...  |
+91 | |         });
+   | |          ^
+   | |          |
+   | |__________`self` escapes the method body here
+   |            argument requires that `'1` must outlive `'static`
+
+warning: variable does not need to be mutable
+  --> src/agent/agent_proxy.rs:91:9
+   |
+91 |         mut inbound: TcpStream,
+   |         ----^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/agent/agent_proxy.rs:97:13
+   |
+97 |         let mut outbound = TcpStream::connect(&target_addr).await
+   |             ----^^^^^^^^
+   |             |
+   |             help: remove this `mut`
+
+error[E0521]: borrowed data escapes outside of method
+   --> src/agent/agent_proxy.rs:236:25
+    |
+213 |       pub async fn start_listener(&self, rule: ProxyRule) -> Result<JoinHandle<()>> {
+    |                                   -----
+    |                                   |
+    |                                   `self` is a reference that is only valid in the method body
+    |                                   let's call the lifetime of this reference `'1`
+...
+236 | /                         tokio::spawn(async move {
+237 | |                             if let Err(e) = proxy_clone.handle_connection(stream, rule_clone, conn_id).await {
+238 | |                                 error!("Connection handling failed: {}", e);
+239 | |                             }
+240 | |                         });
+    | |                          ^
+    | |                          |
+    | |__________________________`self` escapes the method body here
+    |                            argument requires that `'1` must outlive `'static`
+
+error[E0592]: duplicate definitions with name `start_heartbeat_loop`
+  --> src/agent/agent_client.rs:68:5
+   |
+40 |     pub async fn start_heartbeat_loop(&self) {
+   |     ---------------------------------------- other definition for `start_heartbeat_loop`
+...
+68 |     pub async fn start_heartbeat_loop(&self) {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ duplicate definitions for `start_heartbeat_loop`
+
+warning: unused variable: `agent`
+    --> src/app.rs:1063:17
+     |
+1063 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `agent`
+    --> src/app.rs:1080:17
+     |
+1080 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+
+warning: unused variable: `agent`
+    --> src/app.rs:1097:17
+     |
+1097 |     if let Some(agent) = guard.agents.get(&agent_id) {
+     |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_agent`
+
+warning: unused variable: `addr`
+   --> src/agent/agent_proxy.rs:225:33
+    |
+225 |                     Ok((stream, addr)) => {
+    |                                 ^^^^ help: if this is intentional, prefix it with an underscore: `_addr`
+
+Some errors have detailed explanations: E0521, E0592, E0596.
+For more information about an error, try `rustc --explain E0521`.
+warning: `proxy_panel` (bin "proxy_panel") generated 17 warnings
+error: could not compile `proxy_panel` (bin "proxy_panel") due to 4 previous errors; 17 warnings emitted
+[ERROR] ✗ Host build failed
+
+=== Build Summary ===
+Files created:
+✗ ./proxy_panel_linux (Linux x86_64)
+✗ ./proxy_panel_agent_linux (Linux Agent)
+✗ ./proxy_panel.exe (Windows x86_64)
+✗ ./proxy_panel_agent.exe (Windows Agent)
+✗ ./proxy_panel_host (Current Host)
+✗ ./proxy_panel_agent_host (Current Host Agent)
+
+Usage examples:
+Linux:   ./proxy_panel_linux --http-addr 0.0.0.0:1024
+Windows: ./proxy_panel.exe --http-addr 0.0.0.0:1024
+Agent:   ./proxy_panel_agent_linux --name 'Linux Agent' --server 10.250.2.3:1024 --token 'your-token'
+
+[ERROR] Some builds failed. Check error messages above.

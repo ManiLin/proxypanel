@@ -21,7 +21,7 @@ use std::{
 };
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 use tokio::{
-    io::copy_bidirectional,
+    io::{copy_bidirectional, AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
     sync::RwLock,
     task::JoinHandle,
@@ -220,6 +220,8 @@ struct ActiveConn {
     client_ip: String,
     listen_port: Option<u16>,
     started_at: String,
+    bytes_transferred: u64,
+    last_update: String,
 }
 
 pub(crate) struct ListenerHandle {
@@ -1297,7 +1299,7 @@ async fn handle_connection(
         }
     };
 
-    let transfer_result = copy_bidirectional(&mut inbound, &mut outbound).await;
+    let transfer_result = copy_bidirectional_with_tracking(inbound, outbound, &state, conn_id).await;
     match transfer_result {
         Ok((bytes_up, bytes_down)) => {
             record_connection_end(&state, conn_id, bytes_up, bytes_down, None).await;
@@ -1338,6 +1340,8 @@ pub(crate) async fn register_connection(
             client_ip: client_ip.to_string(),
             listen_port,
             started_at: started_at.clone(),
+            bytes_transferred: 0,
+            last_update: started_at.clone(),
         },
     );
     *guard
@@ -1491,11 +1495,97 @@ pub(crate) async fn record_connection_end(
     persist_state(state.clone(), snapshot).await;
 }
 
+pub(crate) async fn update_connection_bytes(
+    state: &Arc<RwLock<AppState>>,
+    conn_id: u64,
+    bytes_transferred: u64,
+) {
+    let mut guard = state.write().await;
+    if let Some(conn) = guard.active.get_mut(&conn_id) {
+        conn.bytes_transferred = bytes_transferred;
+        conn.last_update = now_string();
+    }
+}
+
 fn trim_history(history: &mut Vec<ConnectionLog>) {
     if history.len() > MAX_HISTORY {
         let over = history.len() - MAX_HISTORY;
         history.drain(0..over);
     }
+}
+
+async fn copy_bidirectional_with_tracking(
+    mut inbound: TcpStream,
+    mut outbound: TcpStream,
+    state: &Arc<RwLock<AppState>>,
+    conn_id: u64,
+) -> Result<(u64, u64), Box<dyn std::error::Error + Send + Sync>> {
+    let (mut ri, mut wi) = inbound.split();
+    let (mut ro, mut wo) = outbound.split();
+    
+    let state_clone = state.clone();
+    let conn_id_clone = conn_id;
+    
+    // Task to read from inbound and write to outbound
+    let client_to_server = async move {
+        let mut buffer = [0; 8192];
+        let mut total_bytes = 0u64;
+        let mut last_update = std::time::Instant::now();
+        
+        loop {
+            match ri.read(&mut buffer).await {
+                Ok(0) => break,
+                Ok(n) => {
+                    total_bytes += n as u64;
+                    if wo.write_all(&buffer[..n]).await.is_err() {
+                        break;
+                    }
+                    
+                    // Update bytes every 100ms or every 1MB
+                    if last_update.elapsed().as_millis() >= 100 || total_bytes % (1024 * 1024) == 0 {
+                        update_connection_bytes(&state_clone, conn_id_clone, total_bytes).await;
+                        last_update = std::time::Instant::now();
+                    }
+                }
+                Err(_) => break,
+            }
+        }
+        total_bytes
+    };
+    
+    let state_clone = state.clone();
+    let conn_id_clone = conn_id;
+    
+    // Task to read from outbound and write to inbound
+    let server_to_client = async move {
+        let mut buffer = [0; 8192];
+        let mut total_bytes = 0u64;
+        let mut last_update = std::time::Instant::now();
+        
+        loop {
+            match ro.read(&mut buffer).await {
+                Ok(0) => break,
+                Ok(n) => {
+                    total_bytes += n as u64;
+                    if wi.write_all(&buffer[..n]).await.is_err() {
+                        break;
+                    }
+                    
+                    // Update bytes every 100ms or every 1MB
+                    if last_update.elapsed().as_millis() >= 100 || total_bytes % (1024 * 1024) == 0 {
+                        update_connection_bytes(&state_clone, conn_id_clone, total_bytes).await;
+                        last_update = std::time::Instant::now();
+                    }
+                }
+                Err(_) => break,
+            }
+        }
+        total_bytes
+    };
+    
+    // Run both tasks concurrently
+    let (bytes_up, bytes_down) = tokio::join!(client_to_server, server_to_client);
+    Ok((bytes_up, bytes_down))
 }
 
 fn snapshot_state(state: &AppState) -> PersistedState {
@@ -1672,7 +1762,7 @@ const INDEX_HTML: &str = r#"<!doctype html>
       <div id="active-section">
         <table>
           <thead>
-            <tr><th>Conn ID</th><th>Rule</th><th>Port</th><th>Client IP</th><th>Started</th></tr>
+            <tr><th>Conn ID</th><th>Rule</th><th>Port</th><th>Client IP</th><th>Started</th><th>Speed</th></tr>
           </thead>
           <tbody id="active-body"></tbody>
         </table>
@@ -2078,15 +2168,42 @@ function renderActive(items) {
   body.innerHTML = "";
   items.forEach(conn => {
     const row = document.createElement("tr");
+    // Calculate speed (bytes per second) based on bytes_transferred and time elapsed
+    const speed = calculateSpeed(conn.bytes_transferred, conn.last_update, conn.started_at);
     row.innerHTML = `
       <td>${conn.conn_id}</td>
       <td>${conn.rule_id}</td>
       <td>${conn.listen_port || ""}</td>
       <td>${conn.client_ip}</td>
       <td>${conn.started_at}</td>
+      <td>${speed}</td>
     `;
     body.appendChild(row);
   });
+}
+
+function calculateSpeed(bytesTransferred, lastUpdate, startedAt) {
+  if (bytesTransferred === 0) return "0 B/s";
+  
+  const now = new Date();
+  const lastUpdateDate = new Date(lastUpdate);
+  const startedDate = new Date(startedAt);
+  
+  // Use the more recent time for calculation
+  const timeDiff = Math.max((now - lastUpdateDate) / 1000, 1); // seconds, at least 1
+  
+  const bytesPerSecond = bytesTransferred / timeDiff;
+  
+  // Format the speed
+  if (bytesPerSecond < 1024) {
+    return `${bytesPerSecond.toFixed(1)} B/s`;
+  } else if (bytesPerSecond < 1024 * 1024) {
+    return `${(bytesPerSecond / 1024).toFixed(1)} KB/s`;
+  } else if (bytesPerSecond < 1024 * 1024 * 1024) {
+    return `${(bytesPerSecond / (1024 * 1024)).toFixed(1)} MB/s`;
+  } else {
+    return `${(bytesPerSecond / (1024 * 1024 * 1024)).toFixed(1)} GB/s`;
+  }
 }
 
 function renderRecent(items) {
