@@ -139,7 +139,7 @@ fn build_router(state: Arc<RwLock<AppState>>, config: Arc<AppConfig>) -> Router 
         .route("/api/allowlist/:ip", delete(remove_allow))
         .route("/api/allowlist-mode", get(allowlist_mode).post(update_allowlist_mode))
         .route("/api/rate-limit", get(rate_limit).post(update_rate_limit))
-        .layer(middleware::from_fn_with_state(config.clone(), |config: Arc<AppConfig>, ConnectInfo(addr): ConnectInfo<SocketAddr>, request: Request, next: Next| async move {
+        .layer(middleware::from_fn_with_state(config.clone(), |config: Arc<AppConfig>, ConnectInfo(addr): ConnectInfo<SocketAddr>, request: Request<()>, next: Next<()>| async move {
             // Если нет ограничений по сети, разрешаем все
             if config.allowed_networks.is_empty() {
                 return Ok(next.run(request).await);
