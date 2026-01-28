@@ -41,14 +41,18 @@ async fn ip_filter_middleware(
 ) -> Result<Response, StatusCode> {
     // Если нет ограничений по сети, разрешаем все
     if config.allowed_networks.is_empty() {
+        info!("No IP restrictions configured, allowing all");
         return Ok(next.run(request).await);
     }
 
     let client_ip = addr.ip();
+    info!("Checking access for IP: {}, allowed networks: {:?}", client_ip, config.allowed_networks);
     
     // Проверяем каждый IP/сеть в разрешенном списке
     for network in &config.allowed_networks {
+        info!("Checking network: {}", network);
         if is_ip_allowed(client_ip, network) {
+            info!("Access allowed for IP: {} in network: {}", client_ip, network);
             return Ok(next.run(request).await);
         }
     }
@@ -59,13 +63,21 @@ async fn ip_filter_middleware(
 
 // Функция проверки IP в сети CIDR
 fn is_ip_allowed(ip: IpAddr, network: &str) -> bool {
+    info!("Checking if IP {} is in network {}", ip, network);
+    
     if let Some((network_str, mask_str)) = network.split_once('/') {
         if let (Ok(network_ip), Ok(mask)) = (network_str.parse::<IpAddr>(), mask_str.parse::<u8>()) {
-            return ip_in_network(ip, network_ip, mask);
+            let result = ip_in_network(ip, network_ip, mask);
+            info!("IP {} in network {}/{}: {}", ip, network_ip, mask, result);
+            return result;
         }
     } else if let Ok(network_ip) = network.parse::<IpAddr>() {
-        return ip == network_ip;
+        let result = ip == network_ip;
+        info!("IP {} equals network {}: {}", ip, network_ip, result);
+        return result;
     }
+    
+    warn!("Invalid network format: {}", network);
     false
 }
 
