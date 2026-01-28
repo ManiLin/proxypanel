@@ -35,9 +35,9 @@ use tracing::{error, info, warn};
 async fn ip_filter_middleware(
     config: Arc<AppConfig>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
-    request: Request,
-    next: Next,
-) -> Result<Response, StatusCode> {
+    request: Request<()>,
+    next: Next<()>,
+) -> Result<Response<()>, StatusCode> {
     // Если нет ограничений по сети, разрешаем все
     if config.allowed_networks.is_empty() {
         return Ok(next.run(request).await);
