@@ -1,2 +1,6 @@
 /.cursor
 /install_rustdesk.py
+proxypanel/target/.rustc_info.json
+proxypanel/target/debug/.cargo-lock
+proxypanel/target
+

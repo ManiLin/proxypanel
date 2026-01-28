@@ -14,14 +14,14 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet, VecDeque},
-    net::SocketAddr,
+    net::{IpAddr, SocketAddr},
     path::{Path as StdPath, PathBuf},
     sync::Arc,
     time::{Duration, Instant},
 };
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 use tokio::{
-    io::{copy_bidirectional, AsyncReadExt, AsyncWriteExt},
+    io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
     sync::RwLock,
     task::JoinHandle,
@@ -30,6 +30,37 @@ use tokio_util::sync::CancellationToken;
 use tower_http::cors::CorsLayer;
 use tracing::{error, info, warn};
 
+// Функция проверки IP в сети CIDR
+fn is_ip_allowed(ip: IpAddr, network: &str) -> bool {
+    if let Some((network_str, mask_str)) = network.split_once('/') {
+        if let (Ok(network_ip), Ok(mask)) = (network_str.parse::<IpAddr>(), mask_str.parse::<u8>()) {
+            return ip_in_network(ip, network_ip, mask);
+        }
+    } else if let Ok(network_ip) = network.parse::<IpAddr>() {
+        return ip == network_ip;
+    }
+    false
+}
+
+// Проверка входит ли IP в сеть
+fn ip_in_network(ip: IpAddr, network: IpAddr, mask: u8) -> bool {
+    match (ip, network) {
+        (IpAddr::V4(ip), IpAddr::V4(network)) => {
+            let ip_u32 = u32::from(ip);
+            let network_u32 = u32::from(network);
+            let mask_u32 = if mask >= 32 { 0xFFFFFFFF } else { !0u32 >> mask };
+            (ip_u32 & mask_u32) == (network_u32 & mask_u32)
+        }
+        (IpAddr::V6(ip), IpAddr::V6(network)) => {
+            let ip_u128 = u128::from(ip);
+            let network_u128 = u128::from(network);
+            let mask_u128 = if mask >= 128 { 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF } else { !0u128 >> mask };
+            (ip_u128 & mask_u128) == (network_u128 & mask_u128)
+        }
+        _ => false,
+    }
+}
+
 const STATE_FILE: &str = "state.json";
 const MAX_HISTORY: usize = 10_000;
 
@@ -37,16 +68,18 @@ const MAX_HISTORY: usize = 10_000;
 pub struct AppConfig {
     pub http_addr: SocketAddr,
     pub data_dir: PathBuf,
+    pub allowed_networks: Vec<String>,
 }
 
 impl AppConfig {
-    pub fn new(http_addr: &str, data_dir: &str) -> Result<Self> {
+    pub fn new(http_addr: &str, data_dir: &str, allowed_networks: Vec<String>) -> Result<Self> {
         let http_addr: SocketAddr = http_addr
             .parse()
             .map_err(|_| anyhow!("Invalid http-addr: {}", http_addr))?;
         Ok(Self {
             http_addr,
             data_dir: PathBuf::from(data_dir),
+            allowed_networks,
         })
     }
 }
@@ -75,16 +108,16 @@ pub async fn run_app(config: AppConfig, shutdown: CancellationToken) -> Result<(
         }
     }
 
-    let app = build_router(state);
+    let app = build_router(state, Arc::new(config.clone()));
     info!("Web panel listening on {}", config.http_addr);
     axum::Server::bind(&config.http_addr)
-        .serve(app.into_make_service())
+        .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .with_graceful_shutdown(shutdown.cancelled())
         .await?;
     Ok(())
 }
 
-fn build_router(state: Arc<RwLock<AppState>>) -> Router {
+fn build_router(state: Arc<RwLock<AppState>>, config: Arc<AppConfig>) -> Router {
     Router::new()
         .route("/", get(index))
         .route("/api/status", get(status))
@@ -105,6 +138,24 @@ fn build_router(state: Arc<RwLock<AppState>>) -> Router {
         .route("/api/allowlist/:ip", delete(remove_allow))
         .route("/api/allowlist-mode", get(allowlist_mode).post(update_allowlist_mode))
         .route("/api/rate-limit", get(rate_limit).post(update_rate_limit))
+        .layer(axum::middleware::from_fn_with_state(config.clone(), |config: Arc<AppConfig>, axum::extract::ConnectInfo(addr): axum::extract::ConnectInfo<SocketAddr>, request: axum::extract::Request, next: axum::middleware::Next| async move {
+            // Если нет ограничений по сети, разрешаем все
+            if config.allowed_networks.is_empty() {
+                return Ok(next.run(request).await);
+            }
+
+            let client_ip = addr.ip();
+            
+            // Проверяем каждый IP/сеть в разрешенном списке
+            for network in &config.allowed_networks {
+                if is_ip_allowed(client_ip, network) {
+                    return Ok(next.run(request).await);
+                }
+            }
+
+            warn!("Access denied from IP: {}", client_ip);
+            Err(StatusCode::FORBIDDEN)
+        }))
         .layer(CorsLayer::permissive())
         .with_state(state)
 }
@@ -1284,7 +1335,7 @@ async fn handle_connection(
         }
     };
 
-    let mut outbound = match TcpStream::connect(target_addr.as_str()).await {
+    let outbound = match TcpStream::connect(target_addr.as_str()).await {
         Ok(stream) => stream,
         Err(err) => {
             record_connection_end(
@@ -1515,8 +1566,8 @@ fn trim_history(history: &mut Vec<ConnectionLog>) {
 }
 
 async fn copy_bidirectional_with_tracking(
-    mut inbound: TcpStream,
-    mut outbound: TcpStream,
+    inbound: TcpStream,
+    outbound: TcpStream,
     state: &Arc<RwLock<AppState>>,
     conn_id: u64,
 ) -> Result<(u64, u64), Box<dyn std::error::Error + Send + Sync>> {
