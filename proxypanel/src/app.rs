@@ -87,13 +87,15 @@ fn ip_in_network(ip: IpAddr, network: IpAddr, mask: u8) -> bool {
         (IpAddr::V4(ip), IpAddr::V4(network)) => {
             let ip_u32 = u32::from(ip);
             let network_u32 = u32::from(network);
-            let mask_u32 = if mask >= 32 { 0xFFFFFFFF } else { !0u32 >> mask };
+            let mask_u32 = if mask >= 32 { 0xFFFFFFFF } else { 0xFFFFFFFF << (32 - mask) };
+            info!("IP: {}, Network: {}, Mask: {} (0x{:08x})", ip_u32, network_u32, mask, mask_u32);
+            info!("IP & Mask: 0x{:08x}, Network & Mask: 0x{:08x}", ip_u32 & mask_u32, network_u32 & mask_u32);
             (ip_u32 & mask_u32) == (network_u32 & mask_u32)
         }
         (IpAddr::V6(ip), IpAddr::V6(network)) => {
             let ip_u128 = u128::from(ip);
             let network_u128 = u128::from(network);
-            let mask_u128 = if mask >= 128 { 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF } else { !0u128 >> mask };
+            let mask_u128 = if mask >= 128 { 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF } else { 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF << (128 - mask) };
             (ip_u128 & mask_u128) == (network_u128 & mask_u128)
         }
         _ => false,
