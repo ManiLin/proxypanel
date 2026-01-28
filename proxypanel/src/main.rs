@@ -254,6 +254,10 @@ ReadWritePaths={}/data
 LimitNOFILE=65536
 LimitNPROC=4096
 
+# Allow binding to privileged ports
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
 [Install]
 WantedBy=multi-user.target
 "#,
