@@ -35,6 +35,7 @@ use tracing::{error, info, warn};
 // Middleware функция для проверки IP адреса
 async fn ip_filter_middleware(
     State(config): State<Arc<AppConfig>>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
     request: Request<Body>,
     next: Next<Body>,
 ) -> Result<Response, StatusCode> {
@@ -43,24 +44,17 @@ async fn ip_filter_middleware(
         return Ok(next.run(request).await);
     }
 
-    let client_ip = request
-        .extensions()
-        .get::<ConnectInfo<SocketAddr>>()
-        .map(|info| info.0.ip());
-
-    if let Some(client_ip) = client_ip {
-        // Проверяем каждый IP/сеть в разрешенном списке
-        for network in &config.allowed_networks {
-            if is_ip_allowed(client_ip, network) {
-                return Ok(next.run(request).await);
-            }
+    let client_ip = addr.ip();
+    
+    // Проверяем каждый IP/сеть в разрешенном списке
+    for network in &config.allowed_networks {
+        if is_ip_allowed(client_ip, network) {
+            return Ok(next.run(request).await);
         }
-
-        warn!("Access denied from IP: {}", client_ip);
-        return Err(StatusCode::FORBIDDEN);
     }
 
-    Ok(next.run(request).await)
+    warn!("Access denied from IP: {}", client_ip);
+    Err(StatusCode::FORBIDDEN)
 }
 
 // Функция проверки IP в сети CIDR
