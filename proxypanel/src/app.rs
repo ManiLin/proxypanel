@@ -41,18 +41,14 @@ async fn ip_filter_middleware(
 ) -> Result<Response, StatusCode> {
     // Если нет ограничений по сети, разрешаем все
     if config.allowed_networks.is_empty() {
-        info!("No IP restrictions configured, allowing all");
         return Ok(next.run(request).await);
     }
 
     let client_ip = addr.ip();
-    info!("Checking access for IP: {}, allowed networks: {:?}", client_ip, config.allowed_networks);
     
     // Проверяем каждый IP/сеть в разрешенном списке
     for network in &config.allowed_networks {
-        info!("Checking network: {}", network);
         if is_ip_allowed(client_ip, network) {
-            info!("Access allowed for IP: {} in network: {}", client_ip, network);
             return Ok(next.run(request).await);
         }
     }
@@ -63,21 +59,14 @@ async fn ip_filter_middleware(
 
 // Функция проверки IP в сети CIDR
 fn is_ip_allowed(ip: IpAddr, network: &str) -> bool {
-    info!("Checking if IP {} is in network {}", ip, network);
-    
     if let Some((network_str, mask_str)) = network.split_once('/') {
         if let (Ok(network_ip), Ok(mask)) = (network_str.parse::<IpAddr>(), mask_str.parse::<u8>()) {
-            let result = ip_in_network(ip, network_ip, mask);
-            info!("IP {} in network {}/{}: {}", ip, network_ip, mask, result);
-            return result;
+            return ip_in_network(ip, network_ip, mask);
         }
     } else if let Ok(network_ip) = network.parse::<IpAddr>() {
-        let result = ip == network_ip;
-        info!("IP {} equals network {}: {}", ip, network_ip, result);
-        return result;
+        return ip == network_ip;
     }
     
-    warn!("Invalid network format: {}", network);
     false
 }
 
@@ -88,8 +77,6 @@ fn ip_in_network(ip: IpAddr, network: IpAddr, mask: u8) -> bool {
             let ip_u32 = u32::from(ip);
             let network_u32 = u32::from(network);
             let mask_u32 = if mask >= 32 { 0xFFFFFFFF } else { 0xFFFFFFFF << (32 - mask) };
-            info!("IP: {}, Network: {}, Mask: {} (0x{:08x})", ip_u32, network_u32, mask, mask_u32);
-            info!("IP & Mask: 0x{:08x}, Network & Mask: 0x{:08x}", ip_u32 & mask_u32, network_u32 & mask_u32);
             (ip_u32 & mask_u32) == (network_u32 & mask_u32)
         }
         (IpAddr::V6(ip), IpAddr::V6(network)) => {
