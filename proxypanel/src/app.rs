@@ -5,9 +5,10 @@ use crate::protocol::ProtocolMode;
 use crate::udp_proxy;
 use anyhow::{anyhow, Result};
 use axum::{
-    extract::{Path, Query, State, ConnectInfo},
-    http::{StatusCode, Request, Response},
-    response::Html,
+    body::Body,
+    extract::{ConnectInfo, Path, Query, State},
+    http::{Request, StatusCode},
+    response::{Html, Response},
     routing::{delete, get, post},
     Json, Router,
     middleware::{self, Next},
@@ -33,27 +34,33 @@ use tracing::{error, info, warn};
 
 // Middleware функция для проверки IP адреса
 async fn ip_filter_middleware(
-    config: Arc<AppConfig>,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
-    request: Request,
-    next: Next,
+    State(config): State<Arc<AppConfig>>,
+    request: Request<Body>,
+    next: Next<Body>,
 ) -> Result<Response, StatusCode> {
     // Если нет ограничений по сети, разрешаем все
     if config.allowed_networks.is_empty() {
         return Ok(next.run(request).await);
     }
 
-    let client_ip = addr.ip();
-    
-    // Проверяем каждый IP/сеть в разрешенном списке
-    for network in &config.allowed_networks {
-        if is_ip_allowed(client_ip, network) {
-            return Ok(next.run(request).await);
+    let client_ip = request
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|info| info.0.ip());
+
+    if let Some(client_ip) = client_ip {
+        // Проверяем каждый IP/сеть в разрешенном списке
+        for network in &config.allowed_networks {
+            if is_ip_allowed(client_ip, network) {
+                return Ok(next.run(request).await);
+            }
         }
+
+        warn!("Access denied from IP: {}", client_ip);
+        return Err(StatusCode::FORBIDDEN);
     }
 
-    warn!("Access denied from IP: {}", client_ip);
-    Err(StatusCode::FORBIDDEN)
+    Ok(next.run(request).await)
 }
 
 // Функция проверки IP в сети CIDR
@@ -1329,7 +1336,7 @@ async fn disable_rule_after_start_failure(state: &Arc<RwLock<AppState>>, rule_id
 
 async fn handle_connection(
     state: Arc<RwLock<AppState>>,
-    mut inbound: TcpStream,
+    inbound: TcpStream,
     target_addr: String,
     rule_id: u64,
     listen_port: u16,
